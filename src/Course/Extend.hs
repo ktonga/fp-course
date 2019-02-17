@@ -4,11 +4,11 @@
 
 module Course.Extend where
 
-import Course.Core
-import Course.ExactlyOne
-import Course.List
-import Course.Optional
-import Course.Functor
+import           Course.Core
+import           Course.ExactlyOne
+import           Course.List
+import           Course.Optional
+import           Course.Functor
 
 -- | All instances of the `Extend` type-class must satisfy one law. This law
 -- is not checked by the compiler. This law is given as:
@@ -33,8 +33,7 @@ instance Extend ExactlyOne where
     (ExactlyOne a -> b)
     -> ExactlyOne a
     -> ExactlyOne b
-  (<<=) =
-    error "todo: Course.Extend (<<=)#instance ExactlyOne"
+  (<<=) f = ExactlyOne . f
 
 -- | Implement the @Extend@ instance for @List@.
 --
@@ -51,8 +50,8 @@ instance Extend List where
     (List a -> b)
     -> List a
     -> List b
-  (<<=) =
-    error "todo: Course.Extend (<<=)#instance List"
+  (<<=) f as@(_ :. t) = f as :. (f <<= t)
+  (<<=) _ Nil = Nil
 
 -- | Implement the @Extend@ instance for @Optional@.
 --
@@ -66,8 +65,7 @@ instance Extend Optional where
     (Optional a -> b)
     -> Optional a
     -> Optional b
-  (<<=) =
-    error "todo: Course.Extend (<<=)#instance Optional"
+  (<<=) f a = f a <$ a
 
 -- | Duplicate the functor using extension.
 --
@@ -82,9 +80,5 @@ instance Extend Optional where
 --
 -- >>> cojoin Empty
 -- Empty
-cojoin ::
-  Extend f =>
-  f a
-  -> f (f a)
-cojoin =
-  error "todo: Course.Extend#cojoin"
+cojoin :: Extend f => f a -> f (f a)
+cojoin = (id <<=)
